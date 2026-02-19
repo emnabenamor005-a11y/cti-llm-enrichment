@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 # 1️/ CONNEXION À OPENROUTER
 
 client = OpenAI(
-    api_key="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",  
+    api_key="clé API",  
     base_url="https://openrouter.ai/api/v1"
 )
 
@@ -152,4 +152,5 @@ print("\n Analyse terminée")
 print(" Fichiers générés :")
 print("- threatfox_enriched.json")
 print("- cti_statistics.json")
+
 
