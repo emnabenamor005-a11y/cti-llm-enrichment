@@ -2,9 +2,7 @@ from openai import OpenAI
 import json
 from datetime import datetime, timedelta
 
-# ==================================================
 # 1️/ CONNEXION À OPENROUTER
-# ==================================================
 
 client = OpenAI(
     api_key="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",  
@@ -13,16 +11,12 @@ client = OpenAI(
 
 MODEL_NAME = "mistralai/mistral-7b-instruct"
 
-# ==================================================
 # 2️/ PARAMÈTRES TEMPORELS
-# ==================================================
 
 CURRENT_DATE = datetime(2026, 1, 29)
-OBSOLETE_DELTA = timedelta(days=180)  # 6 mois
+OBSOLETE_DELTA = timedelta(days=180)  
 
-# ==================================================
 # 3️/ CHARGEMENT DES DONNÉES THREATFOX
-# ==================================================
 
 with open("threatfox_data.json", "r", encoding="utf-8") as f:
     threatfox_data = json.load(f)
@@ -33,9 +27,7 @@ enriched_results = {}
 total_iocs = 0
 obsolete_iocs = 0
 
-# ==================================================
 # 4️/ ANALYSE DE CHAQUE IOC
-# ==================================================
 
 for report_id, iocs in threatfox_data.items():
     enriched_results[report_id] = []
@@ -71,7 +63,7 @@ Retourne STRICTEMENT ce JSON valide :
   "priorite": "faible | moyenne | élevée",
   "justification": "courte explication"
 }}
-"""
+
 
         try:
             response = client.chat.completions.create(
@@ -95,9 +87,7 @@ Retourne STRICTEMENT ce JSON valide :
                 "justification": f"Erreur LLM : {str(e)}"
             }
 
-        # ==================================================
-        # 5️/ RÈGLES DE SÉCURITÉ TEMPORELLES (FAILSAFE)
-        # ==================================================
+# 5️/ RÈGLES DE TEMPORELLES 
 
         last_seen = ioc.get("last_seen_utc")
 
@@ -120,9 +110,7 @@ Retourne STRICTEMENT ce JSON valide :
                     "justification": "IOC ancien (> 6 mois)"
                 })
 
-        # ==================================================
         # 6️/ STATISTIQUES
-        # ==================================================
 
         if llm_result["obsolescence"] == "élevée":
             obsolete_iocs += 1
@@ -134,9 +122,7 @@ Retourne STRICTEMENT ce JSON valide :
 
         print(" IOC analysé :", ioc["ioc_value"])
 
-# ==================================================
 # 7️/ CALCUL POURCENTAGE IOC OBSOLÈTES
-# ==================================================
 
 if total_iocs > 0:
     obsolete_percentage = (obsolete_iocs / total_iocs) * 100
@@ -148,9 +134,7 @@ print(f"Total IOC analysés : {total_iocs}")
 print(f"IOC obsolètes : {obsolete_iocs}")
 print(f"Pourcentage d’IOC obsolètes : {obsolete_percentage:.2f} %")
 
-# ==================================================
 # 8️/ SAUVEGARDE DES RÉSULTATS
-# ==================================================
 
 with open("threatfox_enriched.json", "w", encoding="utf-8") as f:
     json.dump(enriched_results, f, indent=2, ensure_ascii=False)
@@ -168,3 +152,4 @@ print("\n Analyse terminée")
 print(" Fichiers générés :")
 print("- threatfox_enriched.json")
 print("- cti_statistics.json")
+
